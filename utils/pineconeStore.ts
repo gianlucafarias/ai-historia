@@ -2,9 +2,15 @@ import * as dotenv from "dotenv";
 import { PineconeStore } from "langchain/vectorstores";
 import { OpenAIEmbeddings } from "langchain/embeddings";
 import { Document } from "langchain/document";
+import { HNSWLib } from "@langchain/community/vectorstores/hnswlib";
+import { TextLoader } from "langchain/document_loaders/fs/text";
+import { join } from 'path';
+
 dotenv.config();
 
 import { PineconeClient } from "@pinecone-database/pinecone";
+
+const VECTOR_STORE_PATH = join(process.cwd(), 'vectorstore')
 
 const pineconeStore = async () => {
   const pinecone = new PineconeClient();

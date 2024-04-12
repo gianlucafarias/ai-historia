@@ -15,10 +15,18 @@ import {
   useToast,
   useColorModeValue,
   Link,
+  Card,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  Flex,
+  Grid,
+  Skeleton
 } from "@chakra-ui/react";
 import { handleEnterKeyPress } from "@/utils";
 import NameInput from "@/components/NameInput";
 import { Message } from "@/types";
+
 
 function Home() {
   // ref need to play audio
@@ -37,17 +45,31 @@ function Home() {
   // tracking user input
   const [text, setText] = useState("");
 
+  const handleCardClick = (question: string) => {
+    setText(question);
+  };
+
+  const shuffleArray = (array) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+  };
+
+  const getRandomSuggestedQuestions = () => {
+    // Crea una copia del arreglo original de preguntas sugeridas
+    const shuffledQuestions = shuffleArray([...suggestedQuestions]);
+    // Devuelve las primeras 3 preguntas de la copia desordenada
+    return shuffledQuestions.slice(0, 3);
+  };
+
   // function to execute api request and communicate with open ai, pinecone & eleven labs
-  const askAi = async (props?: { name?: string }) => {
-    if (!text && !props?.name)
-      return toast({
-        title: "Enter text to translate first!",
-        status: "error",
-      });
+  const askAi = async (props?: { name?: string; }) => {
 
     if (!userName && !props?.name)
       return toast({
-        title: "Enter your name first!",
+        title: "¡Ingresa tu nombre primero!",
         status: "error",
       });
 
@@ -88,7 +110,7 @@ function Home() {
     const { audioDataBase64, translatedText } = jsonResp;
 
     addMessage({ role: "assistant", content: translatedText });
-
+    setSuggestedQuestions(suggestedQuestions);
     const audioBlob = base64ToBlob(audioDataBase64, "audio/mpeg");
     const audioURL = URL.createObjectURL(audioBlob);
 
@@ -115,30 +137,41 @@ function Home() {
     audioRef.current = audio;
   }, []);
 
-  const userBgColor = useColorModeValue("blue.500", "blue.300");
+  const userBgColor = useColorModeValue("green.500", "green.300");
   const assistantBgColor = useColorModeValue("gray.100", "gray.700");
   const userColor = "white";
   const assistantColor = "black";
-
   const [userName, setUserName] = useState<null | string>(null);
+  const [suggestedQuestions, setSuggestedQuestions] = useState<string[]>([
+    "¿Quién fue el intendente de Ceres en 1980?",
+    "¿Cuándo se fundó la ciudad de Ceres?",
+    "¿Cuáles son los principales eventos históricos de Ceres?",
+    "¿Cuando se fundó el Club Atlético Ceres Unión?",
+    "¿Cual es la principal actividad economica de la ciudad?",
+    "¿Cuando se fundó el Club Central Argentino Olimpico?",
+    "¿Quién es el intendente de Ceres actualmente?",
+    "¿Quiénes fueron los primeros pobladores de Ceres?",
 
-  const assistantName = "AI Naval";
+  ]);
+  const assistantName = "HistoriBot";
+  const [randomSuggestedQuestions, setRandomSuggestedQuestions] = useState([]);
+  useEffect(() => {
+    setRandomSuggestedQuestions(getRandomSuggestedQuestions());
+  }, []);
 
   return (
     <>
       <Head>
-        <title>Naval AI Bot</title>
+        <title>HistoriBot - Historia sobre la ciudad de Ceres</title>
       </Head>
       <VStack pt={40} px={4} mb={100} spacing={4} maxW="600px" mx="auto">
         <Heading as="h1" color="black">
-          AI Naval That Gives Advice
+        HistoriBot
         </Heading>
-        <Text color="black" as="i" fontSize="xs">
-          Start a conversation with AI Naval. This is meant for research
-          purposes only. Real Naval Ravikant is not associated with this app.
-          For more tutorials & content, you can follow me on Twitter{" "}
+        <Text color="black" as="i" fontSize="xs" mb={5}>
+          Podes preguntarle sobre datos históricos de la ciudad de Ceres, Santa Fe. Creado por @GianlucaFarias.{" "}
           <Link
-            href="https://twitter.com/emergingbits"
+            href="https://twitter.com/gianlucafarias"
             color="#1DA1F2"
             isExternal
           >
@@ -168,6 +201,7 @@ function Home() {
                   borderRadius="lg"
                   px={4}
                   py={2}
+                  mb={3}
                   maxWidth="70%"
                   position="relative"
                 >
@@ -175,8 +209,8 @@ function Home() {
                     fontSize="xs"
                     position="absolute"
                     color="black"
-                    top={-4}
-                    left={2}
+                    top={-5}
+                    left={1}
                   >
                     {isUser ? userName : assistantName}
                   </Text>
@@ -184,6 +218,28 @@ function Home() {
                 </Box>
               );
             })}
+            
+            <Flex wrap="wrap" justify="center" gap={4}>
+            <Grid templateColumns='repeat(3, 1fr)' gap={6}>
+                {randomSuggestedQuestions.map((question, index) => (
+                <Skeleton key={index} isLoaded={!loading && messages.length > 0}>
+                <Card
+                  key={index}
+                  variant="outline"
+                  cursor="pointer"
+                  
+                  onClick={() => handleCardClick(question)}
+                >
+                  <CardBody>
+                    <Heading size='xs' textTransform='uppercase'>Preguntar</Heading>
+                    <Text pt='2' fontSize='sm'>{question}</Text>
+                  </CardBody>
+                </Card>
+                </Skeleton>
+              ))}
+              </Grid>
+            </Flex>
+            
             <VStack w="100%" spacing={4}>
               <Textarea
                 value={text}
@@ -210,7 +266,7 @@ function Home() {
                 isLoading={loading}
                 spinner={<Beatloader size={8} />}
               >
-                Send
+                Enviar
               </Button>
             </HStack>
           </>

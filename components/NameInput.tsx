@@ -12,7 +12,7 @@ const NameInput = ({ onEnter }: { onEnter: (name: string) => void }) => {
   return (
     <Box width="100%">
       <FormControl id="name" mt={4}>
-        <FormLabel>What is your name?</FormLabel>
+        <FormLabel>¿Cual es tu nombre?</FormLabel>
         <Input
           type="text"
           value={name}
@@ -20,15 +20,16 @@ const NameInput = ({ onEnter }: { onEnter: (name: string) => void }) => {
           onKeyDown={handleEnterKeyPress(() => {
             onEnter(name);
           })}
-          placeholder="Enter your name"
+          placeholder="Ingresa tu nombre"
+          mb={4}
         />
       </FormControl>
       <Button
-        colorScheme="blue"
+        colorScheme="green"
         onClick={() => onEnter(name)}
         isDisabled={!name.trim()}
       >
-        Submit
+        Registrarme
       </Button>
     </Box>
   );

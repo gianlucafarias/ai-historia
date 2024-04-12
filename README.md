@@ -17,7 +17,7 @@ OpenAI API
 ### Instalación
 Clona el repositorio:
 
-git clone https://github.com/tu-usuario/historibot.git
+git clone https://github.com/gianlucafarias/ai-historia.git
 
 Instala las dependencias:
 
